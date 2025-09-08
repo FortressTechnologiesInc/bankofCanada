@@ -30,7 +30,7 @@ jobs:
           args: >
             -Dsonar.projectKey=bofc
             -Dsonar.projectName=bofc
-            -Dsonar.sources=bankapp
+            -Dsonar.sources=.
             -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
