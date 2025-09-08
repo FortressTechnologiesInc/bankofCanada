@@ -6,7 +6,7 @@ on:
 
 jobs:
   compile:
-    runs-on: nodwrkz
+    runs-on: [self-hosted, nodwrkz]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -17,7 +17,7 @@ jobs:
           node-version: '20'   # use LTS for stability
 
   gitleaks-scan:
-    runs-on: nodwrkz
+    runs-on: [self-hosted, nodwrkz]
     needs: compile
     steps:
       - name: Checkout code
@@ -32,7 +32,7 @@ jobs:
           gitleaks detect --source ./api --exit-code 1
 
   trivy_fs_scan:
-    runs-on: nodwrkz
+    runs-on: [self-hosted, nodwrkz]
     needs: compile
     steps:
       - name: Checkout code
@@ -50,7 +50,7 @@ jobs:
           exit-code: 1
 
   sonar-check:
-    runs-on: nodwrkz
+    runs-on: [self-hosted, nodwrkz]
     needs: compile
     steps:
       - name: Checkout code
@@ -70,7 +70,7 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
   build_backend_docker_image_and_push:
-    runs-on: nodwrkz
+    runs-on: [self-hosted, nodwrkz]
     needs: [gitleaks-scan, trivy_fs_scan, sonar-check]
     steps:
       - name: Checkout code
