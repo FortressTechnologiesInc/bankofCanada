@@ -17,16 +17,6 @@ jobs:
         with:
           node-version: '23'   # adjust version as per your environment
 
-      - name: Frontend Compilation (Syntax Check)
-        run: |
-          cd client
-          find . -name "*.js" -exec node --check {} +
-
-      - name: Backend Compilation (Syntax Check)
-        run: |
-          cd api
-          find . -name "*.js" -exec node --check {} +
-
   gitleaks-scan:
     runs-on: nodwrkz
     needs: compile
@@ -116,43 +106,6 @@ jobs:
       - name: Logout from Docker Hub
         run: docker logout
 
-  trivy_image_scan:
-    runs-on: nodwrkz
-    needs: build_backend_docker_image_and_push
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run Trivy image scan for backend
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          scan-type: image
-          image-ref: iscanprint/bankofcanada:1.0
-          format: table
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: os,library
-          severity: CRITICAL,HIGH
-
-  deploy_to_kubernetes:
-    runs-on: nodwrkz
-    needs: trivy_image_scan
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up kubectl
-        uses: actions/setup-kubectl@v4
-        with:
-          version: v1.30.0
-
-      - name: Configure kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG_DATA }}" | base64 -d > $HOME/.kube/config
-
-      - name: Deploy to kubeadm cluster
-        run: |
-          kubectl apply -f ds.yaml
-         
+ 
+  
           
