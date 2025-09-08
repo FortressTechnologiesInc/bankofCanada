@@ -3,7 +3,6 @@ name: myCICD
 on:
   push:
     branches: [ main ]
- 
 
 jobs:
   compile:
@@ -15,7 +14,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '23'   # adjust version as per your environment
+          node-version: '20'   # use LTS for stability
 
   gitleaks-scan:
     runs-on: nodwrkz
@@ -27,14 +26,14 @@ jobs:
       - name: Gitleaks Setup
         uses: gitleaks/gitleaks-action@v2
 
-      - name: Gitleaks Scan
+      - name: Gitleaks Scan (client and api)
         run: |
           gitleaks detect --source ./client --exit-code 1
           gitleaks detect --source ./api --exit-code 1
 
   trivy_fs_scan:
     runs-on: nodwrkz
-    needs: gitleaks-scan
+    needs: compile
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -48,10 +47,11 @@ jobs:
           ignore-unfixed: true
           vuln-type: os,library
           severity: CRITICAL,HIGH
+          exit-code: 1
 
   sonar-check:
     runs-on: nodwrkz
-    needs: trivy_fs_scan
+    needs: compile
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -63,7 +63,7 @@ jobs:
           args: >
             -Dsonar.projectKey=bofc
             -Dsonar.projectName=bofc
-            -Dsonar.sources=.
+            -Dsonar.sources=bankapp
             -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -71,7 +71,7 @@ jobs:
 
   build_backend_docker_image_and_push:
     runs-on: nodwrkz
-    needs: sonar-check
+    needs: [gitleaks-scan, trivy_fs_scan, sonar-check]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -86,7 +86,7 @@ jobs:
         run: java -version
 
       - name: Build with Maven
-        run: mvn package -DskipTests=true
+        run: mvn -f bankapp/pom.xml package -DskipTests=true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -96,16 +96,3 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build Docker image
-        run: docker build -t iscanprint/bankofcanada:1.0 .
-
-      - name: Push Docker image
-        run: docker push iscanprint/bankofcanada:1.0
-
-      - name: Logout from Docker Hub
-        run: docker logout
-
- 
-  
-          
