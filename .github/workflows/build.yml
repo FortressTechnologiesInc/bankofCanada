@@ -1,6 +1,6 @@
 jobs:
   build:
-    runs-on: nodwrkz
+    runs-on: ubuntu-latest #nodwrkz
     steps:
       - uses: actions/checkout@v2
         with:
