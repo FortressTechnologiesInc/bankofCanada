@@ -7,14 +7,34 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Build and Analyze
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
 
-      - uses: sonarsource/sonarqube-scan-action@master
+      # Set up JDK
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # Build with Maven (compiles Java code)
+      - name: Build with Maven
+        run: mvn -f bankapp/pom.xml clean package -DskipTests=true
+
+      # Run SonarQube analysis
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        with:
+          projectBaseDir: ./bankapp
+          args: >
+            -Dsonar.projectKey=bofc
+            -Dsonar.projectName=bofc
+            -Dsonar.sources=src/main/java
+            -Dsonar.java.binaries=target/classes
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
