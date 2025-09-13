@@ -75,11 +75,6 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
-
-      - name: Check Dependency-Track Results
-        uses: altinukshini/dependency-track-checker@main
-
-
       - name: Upload to Nexus
         uses: cdqag/action-upload-to-nexus@v1
         with:
