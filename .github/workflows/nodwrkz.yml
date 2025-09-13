@@ -43,7 +43,7 @@ jobs:
       - name: Run OWASP Dependency-Check
         uses: dependency-check/Dependency-Check_Action@main
         with:
-          project: 'my-app'
+          project: 'bofc-app'
           path: '.'
           format: 'ALL'
           out: 'dependency-check-report'
@@ -54,12 +54,12 @@ jobs:
           path: dependency-check-report
 
       - name: Build an image from Dockerfile
-        run: docker build -t docker.io/my-organization/my-app:${{ github.sha }} .
+        run: docker build -t iscanprint/bofc:v001 .
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: 'docker.io/my-organization/my-app:${{ github.sha }}'
+          image-ref: 'iscanprint/bofc:v001'
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
@@ -75,9 +75,5 @@ jobs:
           instance-url: ${{ vars.NEXUS_URL }}
           username: ${{ vars.NEXUS_USER }}
           password: ${{ secrets.NEXUS_PASS }}
-          repository: my-repository
-          default-destination: some/path/or/empty/string
-          files: |
-            file1.txt
-            file2.txt => some/other/path/with-other-name.txt
-            sub/* => oh/look/it/works/*
+          repository: bofc-app  #my-repository
+          
