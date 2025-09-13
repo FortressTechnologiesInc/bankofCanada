@@ -77,7 +77,8 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Check Dependency-Track Results
-        uses: altinukshini/dependency-track-checker@v1
+        uses: altinukshini/dependency-track-checker@main
+
 
       - name: Upload to Nexus
         uses: cdqag/action-upload-to-nexus@v1
