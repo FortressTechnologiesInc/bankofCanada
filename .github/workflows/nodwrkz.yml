@@ -13,21 +13,24 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: SonarQube Scan
-        uses: opsverseio/sonarqube-quality-gate-action@0.1.0
+       # Install SonarQube scanner
+      - name: Set up SonarQube Scanner
+        uses: sonarsource/sonarqube-scan-action@v2
+        with:
+          args: >
+            -Dsonar.projectKey=bofc-app
+            -Dsonar.sources=.
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SET_SONAR_PROJECT_STATUS: true 
 
+      # Quality gate check (waits for analysis result)
       - name: SonarQube Quality Gate check
-        id: sonarqube-quality-gate-check
-        uses: opsverseio/sonarqube-quality-gate-action@0.1.0
+        uses: sonarsource/sonarqube-quality-gate-action@v1
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SET_SONAR_PROJECT_STATUS: true 
 
   build:
     name: Build and Scan
